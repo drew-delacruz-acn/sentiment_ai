@@ -1,0 +1,170 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Building a two‑day, async‑first back‑testing MVP takes four pillars: a clear **Product Requirements Document (PRD)**, a tight **folder structure**, a repeatable **repo + venv setup**, and an hour‑by‑hour **build script** that finishes with one‑command cloud deploys.  Below you’ll find **everything in one place**, with copy‑paste commands and citations for every major tool or API reference.
+
+---
+
+## 1  PRD (condensed but complete)
+
+### 1.1  Problem & Goal  
+Investors need a fast way to see whether earnings‑call sentiment predicts next‑quarter price moves and to back‑test simple trading rules on demand. The MVP ingests transcripts, scores sentiment, overlays prices, fits a quantile‑regression forecast (P10, P50, P90), and shows Sharpe, Sortino, and cumulative return.
+
+### 1.2  User Stories  
+* **R1 – Query:** “As an investor I enter `{ticker, base‑year, horizon}` and get a price+sentiment chart.”  
+* **R2 – Forecast:** “I see shaded probability bands for the next quarter’s close price.”  
+* **R3 – Metrics:** “The dashboard reports Sharpe, Sortino, and cumulative return so I can judge viability.”  
+* **R4 – Speed:** “Results arrive in seconds; I can queue multiple tickers concurrently.”
+
+### 1.3  Functional Requirements  
+| Group | Requirement |
+|-------|-------------|
+| **Data** | Pull earnings transcripts from **Financial Modeling Prep (FMP)**; pull OHLCV prices via **Yahoo Finance** (`yfinance`) citeturn0search6 |
+| **Inference** | Call OpenAI or Gemini in parallel to score `negative/neutral/optimistic` sentiment. |
+| **Forecast** | Fit statsmodels **Quantile Regression** at τ = 0.1/0.5/0.9; fallback to OLS for < 10 obs citeturn0search5 |
+| **API** | Expose `/analyze?ticker=&year=&horizon=` returning JSON ready for Plotly. |
+| **Front end** | Render interactive line chart (price) + markers (sentiment) + filled bands in React‑Plotly citeturn0search9 |
+| **Metrics** | Calculate daily returns → Sharpe & Sortino ratios plus cumulative‑return series. |
+| **Performance** | All external calls done with `httpx.AsyncClient` + `asyncio.gather()` citeturn0search4. |
+
+### 1.4  Non‑Functional  
+* P95 response ≤ 5 s for one ticker/year on 8 Mbps connection.  
+* Stateless API; caching layer with Redis TTL = 30 min.  
+* Deployed behind HTTPS; no PII stored.
+
+### 1.5  Success Criteria  
+* ≤ 2 min “idea → chart” cycle for any S&P 500 ticker.  
+* Forecast MAE < 15 % of actual close in validation set.  
+* 90 % of queries served under 5 s.
+
+### 1.6  System Architecture  
+* **Front end:** Vite + React 18 TS + Tailwind CSS for styling citeturn0search7turn0search8; data via SWR hooks (stale‑while‑revalidate) citeturn0search10.  
+* **API layer:** FastAPI (async ASGI) citeturn0search3, `httpx`, Redis, and optional Celery for long jobs.  
+* **Modeling:** `statsmodels`, `numpy`, `pandas`.  
+* **DevOps:** Docker Compose local stack; Fly.io for API; Netlify for SPA.  
+
+---
+
+## 2  Folder / Repo Layout
+
+```
+backtesting-mvp/
+├── backend/
+│   ├── app/
+│   │   ├── main.py            # FastAPI router
+│   │   ├── models.py          # Pydantic schemas
+│   │   ├── services/
+│   │   │   ├── fmp.py
+│   │   │   ├── prices.py
+│   │   │   └── llm.py
+│   │   ├── core/
+│   │   │   ├── forecast.py
+│   │   │   └── metrics.py
+│   │   └── tests/
+│   └── Dockerfile
+├── frontend/
+│   ├── src/
+│   │   ├── hooks/useAnalysis.ts
+│   │   ├── components/
+│   │   │   ├── QueryForm.tsx
+│   │   │   ├── Chart.tsx
+│   │   │   └── Metrics.tsx
+│   │   └── App.tsx
+│   └── tailwind.config.js
+├── infra/docker-compose.yml
+├── .github/workflows/ci.yml
+├── .gitignore
+└── README.md
+```
+
+---
+
+## 3  Git Repo & Virtual‑env Setup (0 – 2 h)
+
+```bash
+# 1. project & git
+mkdir backtesting-mvp && cd $_
+git init                             # new repo citeturn0search1
+gh repo create backtesting-mvp --public --source=. --remote=origin  # citeturn0search2
+git push -u origin main
+
+# 2. python virtual environment
+python3 -m venv .venv                # create venv citeturn0search0
+source .venv/bin/activate            # activate (Windows: .venv\Scripts\activate)
+pip install --upgrade pip setuptools wheel  # keep tooling current citeturn0search2
+
+# 3. backend dependencies
+pip install "fastapi[standard]" uvicorn[standard] httpx aioredis pandas numpy statsmodels pytest  # citeturn0search3turn0search4turn0search5
+pip install yfinance                                                     # citeturn0search6
+
+# 4. frontend scaffold
+npm create vite@latest frontend -- --template react-ts   # Vite React TS citeturn0search7
+cd frontend
+npm i -D tailwindcss @tailwindcss/vite                   # Tailwind plugin citeturn0search8
+npm i react-plotly.js plotly.js                          # Plotly wrapper citeturn0search9
+npm i swr                                                # SWR fetcher citeturn0search10
+npx tailwindcss init -p                                  # generate configs
+```
+
+Commit `.venv/`, `node_modules/`, and build artifacts to `.gitignore`; push `chore: scaffolds` commit.
+
+---
+
+## 4  Hour‑by‑Hour Build Script
+
+| Day | Hr | Task | Key Files |
+|-----|----|------|-----------|
+| **1** | 2‑3 | `main.py` health route | backend/app/main.py |
+|  | 3‑5 | Async adapters: `fmp.py`, `prices.py`, `llm.py` (use `httpx.AsyncClient`) citeturn0search4 | services/ |
+|  | 5‑7 | `forecast.py` (quantile regression) citeturn0search5 | core/ |
+|  | 7‑8 | `metrics.py` (returns → Sharpe/Sortino) | core/ |
+|  | 8‑9 | `/analyze` endpoint (`asyncio.gather()`) | main.py |
+|  | 9‑10 | Pytest smoke tests → commit `feat: backend-core` | tests/ |
+| **1** | 10‑11 | Dockerfile (uvicorn) + docker‑compose (Redis + API) | backend/, infra/ |
+|  | 11‑12 | `docker compose up` local verification citeturn0search11 | — |
+| **2** | 0‑1 | Add `useAnalysis.ts` SWR hook for `/api/analyze` | frontend/src/hooks |
+|  | 1‑3 | `Chart.tsx` (price line, sentiment markers, P10–P90 fill in React‑Plotly) citeturn0search9 | components/ |
+|  | 3‑4 | `Metrics.tsx` (Sharpe, Sortino, cumulative return sparkline) | components/ |
+|  | 4‑5 | Query form + Tailwind styling | components/ |
+|  | 5‑6 | E2E test (Playwright) | frontend/e2e |
+|  | 6‑8 | **Deploy API**: `fly launch --dockerfile backend/Dockerfile` then `fly deploy` citeturn0search12 | — |
+|  | 8‑9 | **Deploy SPA**: `netlify init && netlify deploy --prod --dir=dist` citeturn0search13 | — |
+|  | 9‑10 | PR merge, tag `v0.1.0`, celebrate |
+
+---
+
+## 5  Deployment Fast‑Paths
+
+### 5.1 Docker Compose (local)
+```bash
+docker compose -f infra/docker-compose.yml up --build   # boots API on :8000 & Redis citeturn0search11
+```
+
+### 5.2 Fly.io (API)
+```bash
+cd backend
+fly launch --name backtest-api --dockerfile Dockerfile   # auto‑detect & configure citeturn0search12
+fly deploy
+```
+
+### 5.3 Netlify (Front end)
+```bash
+cd frontend
+npm run build
+netlify init                                            # connect repo & set build Dir=dist
+netlify deploy --prod --dir=dist                        # publish SPA citeturn0search13
+```
+
+---
+
+## 6  Post‑MVP Stretch Goals
+
+* Web‑socket streaming for progressive rendering.  
+* Replace statsmodels with NeuralProphet probabilistic forecasts.  
+* Add vector store for “explain this price gap” Q&A.
+
+---
+
+**You now have a single, end‑to‑end blueprint—PRD, code layout, venv setup, command‑by‑command build order, and deployment instructions—ready to paste into Cursor or any IDE of your choice.**  Happy shipping!
