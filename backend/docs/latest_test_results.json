@@ -1,0 +1,389 @@
+{
+  "transcript": {
+    "date": "2025-01-30 17:00:00",
+    "quarter": 1,
+    "content": "Suhasini Chandramouli: Good afternoon, and welcome to the Apple Q1 Fiscal Year 2025 Earnings Conference Call. My name is Suhasini Chandramouli, Director of Investor Relations. Today's call is being recorded. Speaking first today are Apple CEO, Tim Cook, and he will be followed by CFO, Kevan Parekh. After that, we'll open the call to questions from analysts. Please note that some of the information you'll hear during our discussion today will consist of forward-looking statements, including, without limitation, those regarding revenue, gross margin, operating expenses, other income and expense, taxes, capital allocation, and future business outlook, including the potential impact of macroeconomic conditions on the company's business and results of operations. These statements involve risks and uncertainties that may cause actual results or trends to differ materially from our forecast. For more information, please refer to the risk factors discussed in Apple's most recently filed annual..."
+  },
+  "analysis": {
+    "sentiment_score": 0.2910275224890017,
+    "confidence": 0.7785538831254938,
+    "raw_llm_responses": [
+      {
+        "label": "neutral",
+        "score": 0.9402442574501038
+      },
+      {
+        "label": "neutral",
+        "score": 0.6292052268981934
+      },
+      {
+        "label": "neutral",
+        "score": 0.9100132584571838
+      },
+      {
+        "label": "positive",
+        "score": 0.9313651919364929
+      },
+      {
+        "label": "positive",
+        "score": 0.9187793731689453
+      },
+      {
+        "label": "neutral",
+        "score": 0.5707246661186218
+      },
+      {
+        "label": "neutral",
+        "score": 0.7716873288154602
+      },
+      {
+        "label": "positive",
+        "score": 0.7168124914169312
+      },
+      {
+        "label": "positive",
+        "score": 0.5278307795524597
+      },
+      {
+        "label": "positive",
+        "score": 0.7367303967475891
+      },
+      {
+        "label": "positive",
+        "score": 0.6274839043617249
+      },
+      {
+        "label": "neutral",
+        "score": 0.7515806555747986
+      },
+      {
+        "label": "positive",
+        "score": 0.9021127223968506
+      },
+      {
+        "label": "neutral",
+        "score": 0.5839211940765381
+      },
+      {
+        "label": "positive",
+        "score": 0.6716756224632263
+      },
+      {
+        "label": "positive",
+        "score": 0.8836432099342346
+      },
+      {
+        "label": "neutral",
+        "score": 0.59308922290802
+      },
+      {
+        "label": "neutral",
+        "score": 0.6118435859680176
+      },
+      {
+        "label": "positive",
+        "score": 0.7311503887176514
+      },
+      {
+        "label": "neutral",
+        "score": 0.8273730278015137
+      },
+      {
+        "label": "neutral",
+        "score": 0.8853937983512878
+      },
+      {
+        "label": "positive",
+        "score": 0.7233583927154541
+      },
+      {
+        "label": "positive",
+        "score": 0.9386184811592102
+      },
+      {
+        "label": "positive",
+        "score": 0.949941098690033
+      },
+      {
+        "label": "positive",
+        "score": 0.9562543034553528
+      },
+      {
+        "label": "positive",
+        "score": 0.8646324872970581
+      },
+      {
+        "label": "positive",
+        "score": 0.9334006309509277
+      },
+      {
+        "label": "positive",
+        "score": 0.92911297082901
+      },
+      {
+        "label": "negative",
+        "score": 0.9580950736999512
+      },
+      {
+        "label": "positive",
+        "score": 0.9465312957763672
+      },
+      {
+        "label": "positive",
+        "score": 0.9089678525924683
+      },
+      {
+        "label": "positive",
+        "score": 0.6775954961776733
+      },
+      {
+        "label": "positive",
+        "score": 0.6244614720344543
+      },
+      {
+        "label": "neutral",
+        "score": 0.8112761378288269
+      },
+      {
+        "label": "negative",
+        "score": 0.9607937932014465
+      },
+      {
+        "label": "positive",
+        "score": 0.5668830871582031
+      },
+      {
+        "label": "neutral",
+        "score": 0.9134969711303711
+      },
+      {
+        "label": "neutral",
+        "score": 0.8013493418693542
+      },
+      {
+        "label": "positive",
+        "score": 0.5067505240440369
+      },
+      {
+        "label": "neutral",
+        "score": 0.9298174977302551
+      },
+      {
+        "label": "neutral",
+        "score": 0.766964852809906
+      },
+      {
+        "label": "negative",
+        "score": 0.9721517562866211
+      },
+      {
+        "label": "neutral",
+        "score": 0.5774334073066711
+      },
+      {
+        "label": "positive",
+        "score": 0.5422691702842712
+      },
+      {
+        "label": "neutral",
+        "score": 0.8492511510848999
+      },
+      {
+        "label": "neutral",
+        "score": 0.5101810693740845
+      },
+      {
+        "label": "neutral",
+        "score": 0.8749994039535522
+      },
+      {
+        "label": "neutral",
+        "score": 0.8603423237800598
+      },
+      {
+        "label": "neutral",
+        "score": 0.744534969329834
+      },
+      {
+        "label": "positive",
+        "score": 0.7186985611915588
+      },
+      {
+        "label": "positive",
+        "score": 0.7846255898475647
+      },
+      {
+        "label": "neutral",
+        "score": 0.6609578728675842
+      },
+      {
+        "label": "neutral",
+        "score": 0.8422465324401855
+      },
+      {
+        "label": "positive",
+        "score": 0.7152413129806519
+      },
+      {
+        "label": "positive",
+        "score": 0.7856859564781189
+      },
+      {
+        "label": "positive",
+        "score": 0.721437394618988
+      },
+      {
+        "label": "neutral",
+        "score": 0.7625896334648132
+      },
+      {
+        "label": "neutral",
+        "score": 0.37966737151145935
+      },
+      {
+        "label": "neutral",
+        "score": 0.843924880027771
+      },
+      {
+        "label": "neutral",
+        "score": 0.9034790396690369
+      },
+      {
+        "label": "negative",
+        "score": 0.7982932925224304
+      },
+      {
+        "label": "positive",
+        "score": 0.8871521353721619
+      },
+      {
+        "label": "positive",
+        "score": 0.9385102987289429
+      },
+      {
+        "label": "neutral",
+        "score": 0.8054521679878235
+      },
+      {
+        "label": "neutral",
+        "score": 0.8927968144416809
+      },
+      {
+        "label": "positive",
+        "score": 0.5632497668266296
+      },
+      {
+        "label": "neutral",
+        "score": 0.8595517873764038
+      },
+      {
+        "label": "neutral",
+        "score": 0.5211700797080994
+      },
+      {
+        "label": "neutral",
+        "score": 0.9057508707046509
+      },
+      {
+        "label": "neutral",
+        "score": 0.6569758057594299
+      },
+      {
+        "label": "positive",
+        "score": 0.9086724519729614
+      },
+      {
+        "label": "neutral",
+        "score": 0.5963951349258423
+      },
+      {
+        "label": "neutral",
+        "score": 0.8605858683586121
+      },
+      {
+        "label": "positive",
+        "score": 0.778609573841095
+      },
+      {
+        "label": "positive",
+        "score": 0.5464176535606384
+      },
+      {
+        "label": "neutral",
+        "score": 0.7665068507194519
+      },
+      {
+        "label": "positive",
+        "score": 0.6255682110786438
+      },
+      {
+        "label": "positive",
+        "score": 0.5507686734199524
+      },
+      {
+        "label": "positive",
+        "score": 0.7220862507820129
+      },
+      {
+        "label": "neutral",
+        "score": 0.9020639061927795
+      },
+      {
+        "label": "neutral",
+        "score": 0.8115452527999878
+      },
+      {
+        "label": "neutral",
+        "score": 0.8075124621391296
+      },
+      {
+        "label": "positive",
+        "score": 0.7637200355529785
+      },
+      {
+        "label": "positive",
+        "score": 0.760484516620636
+      },
+      {
+        "label": "neutral",
+        "score": 0.8283901214599609
+      },
+      {
+        "label": "neutral",
+        "score": 0.8747879862785339
+      },
+      {
+        "label": "neutral",
+        "score": 0.9043686389923096
+      },
+      {
+        "label": "neutral",
+        "score": 0.8983354568481445
+      },
+      {
+        "label": "neutral",
+        "score": 0.9125904440879822
+      },
+      {
+        "label": "neutral",
+        "score": 0.8552018404006958
+      },
+      {
+        "label": "neutral",
+        "score": 0.904209554195404
+      }
+    ],
+    "key_points": [
+      "Suhasini Chandramouli: Good afternoon, and welcome to the Apple Q1 Fiscal Year 2025 Earnings Conference Call.",
+      "Please note that some of the information you'll hear during our discussion today will consist of forward-looking statements, including, without limitation, those regarding revenue, gross margin, operating expenses, other income and expense, taxes, capital allocation, and future business outlook, including the potential impact of macroeconomic conditions on the company's business and results of operations.",
+      "These statements involve risks and uncertainties that may cause actual results or trends to differ materially from our forecast.",
+      "Today, Apple is reporting revenue of $124.",
+      "We achieved all-time revenue records across the majority of the countries and regions we track, including the Americas, Europe, Japan, and the rest of Asia Pacific."
+    ],
+    "risks": [
+      "These statements involve risks and uncertainties that may cause actual results or trends to differ materially from our forecast.",
+      "For more information, please refer to the risk factors discussed in Apple's most recently filed annual report on Form 10-K and the Form 8-K filed with the SEC today along with the associated press release.",
+      "Deutsche Bank launched its Mac as Choice program for the developers and also issued the latest MacBook Air as a standard computer for their entire mortgage lending division."
+    ]
+  }
+}
