@@ -8,8 +8,11 @@ import logging
 import httpx
 from typing import Optional
 import asyncio
+from datetime import datetime
 from app.models import HealthResponse
 from app.services import init_services, get_sentiment_analyzer
+from app.services.prices import PriceService
+from app.core.forecast import PriceForecast
 
 # Configure logging
 logging.basicConfig(
@@ -21,6 +24,7 @@ logger = logging.getLogger(__name__)
 # Shared HTTP client for async requests
 class GlobalState:
     http_client: Optional[httpx.AsyncClient] = None
+    price_service: Optional[PriceService] = None
 
 global_state = GlobalState()
 
@@ -36,6 +40,7 @@ async def lifespan(app: FastAPI):
     
     # Initialize services with HTTP client
     init_services(global_state.http_client)
+    global_state.price_service = PriceService(global_state.http_client)
     logger.info("Initialized services with HTTP client")
     
     yield  # Server is running and handling requests here
@@ -83,7 +88,8 @@ async def root():
         "status": "operational",
         "endpoints": {
             "health": "/health",
-            "analyze": "/analyze"  # To be implemented
+            "analyze": "/analyze",
+            "forecast": "/api/forecast/{ticker}"
         }
     }
 
@@ -112,6 +118,65 @@ async def analyze_ticker(ticker: str, year: Optional[int] = None):
     except Exception as e:
         logger.error(f"Error analyzing {ticker}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+
+@app.get("/api/forecast/{ticker}")
+async def forecast_price(
+    ticker: str,
+    start_date: str,
+    forecast_days: int = 30
+):
+    """Generate price forecast for a given ticker.
+    
+    Args:
+        ticker: Stock ticker symbol
+        start_date: Start date for historical data in YYYY-MM-DD format
+        forecast_days: Number of days to forecast (default: 30)
+    """
+    try:
+        if global_state.price_service is None:
+            raise HTTPException(status_code=503, detail="Service unavailable: Price service not initialized")
+        
+        # Validate start date
+        try:
+            start = datetime.strptime(start_date, "%Y-%m-%d")
+            if start > datetime.now():
+                raise HTTPException(status_code=400, detail="Future start date not allowed")
+        except ValueError:
+            raise HTTPException(status_code=422, detail="Invalid date format. Use YYYY-MM-DD")
+        
+        # Get historical prices
+        historical_data = await global_state.price_service.get_historical_prices(ticker, start_date)
+        
+        if historical_data.empty:
+            raise HTTPException(status_code=404, detail="No price data found")
+            
+        if len(historical_data) < 30:  # Require at least 30 days of data
+            raise HTTPException(status_code=400, detail="Insufficient historical data")
+            
+        # Generate forecast
+        forecaster = PriceForecast()
+        forecast_result = forecaster.create_forecast(historical_data, forecast_days)
+        
+        return {
+            "historical": {
+                "dates": historical_data.index.strftime("%Y-%m-%d").tolist(),
+                "prices": historical_data["Close"].tolist()
+            },
+            "forecast": {
+                "dates": forecast_result["dates"],
+                "bands": forecast_result["bands"]
+            },
+            "metadata": {
+                "ticker": ticker,
+                "forecast_days": forecast_days
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error forecasting {ticker}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Forecast failed: {str(e)}")
 
 # Error handling
 @app.exception_handler(HTTPException)
