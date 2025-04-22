@@ -8,7 +8,8 @@ import logging
 import httpx
 from typing import Optional
 import asyncio
-from backend.app.models import HealthResponse
+from app.models import HealthResponse
+from app.services import init_services, get_sentiment_analyzer
 
 # Configure logging
 logging.basicConfig(
@@ -32,6 +33,10 @@ async def lifespan(app: FastAPI):
         limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
     )
     logger.info("Starting up async HTTP client")
+    
+    # Initialize services with HTTP client
+    init_services(global_state.http_client)
+    logger.info("Initialized services with HTTP client")
     
     yield  # Server is running and handling requests here
     
@@ -81,6 +86,32 @@ async def root():
             "analyze": "/analyze"  # To be implemented
         }
     }
+
+@app.get("/analyze/{ticker}")
+async def analyze_ticker(ticker: str, year: Optional[int] = None):
+    """
+    Analyze sentiment for a given ticker's earnings call transcripts.
+    
+    Args:
+        ticker: Stock ticker symbol
+        year: Optional year to filter transcripts (defaults to current year)
+    """
+    try:
+        if global_state.http_client is None:
+            raise HTTPException(status_code=503, detail="Service unavailable: HTTP client not initialized")
+            
+        # Get the initialized sentiment analyzer
+        analyzer = get_sentiment_analyzer()
+        results = await analyzer.analyze_stock_sentiment(ticker, year)
+        
+        if results["status"] == "error":
+            raise HTTPException(status_code=500, detail=results["message"])
+            
+        return results
+        
+    except Exception as e:
+        logger.error(f"Error analyzing {ticker}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 # Error handling
 @app.exception_handler(HTTPException)
