@@ -63,6 +63,7 @@ class PriceService:
             
         Returns:
             DataFrame with columns: Open, High, Low, Close, Volume, Dividends, Stock Splits
+            Index: DatetimeIndex with the dates of the price data
         """
         retries = 0
         while retries < self.max_retries:
@@ -80,6 +81,10 @@ class PriceService:
                 if df.empty:
                     logger.warning(f"No price data found for {ticker} between {start_date} and {end_date}")
                     return pd.DataFrame()
+                
+                # Ensure the index is a DatetimeIndex
+                if not isinstance(df.index, pd.DatetimeIndex):
+                    df.index = pd.to_datetime(df.index)
                     
                 return df
                 

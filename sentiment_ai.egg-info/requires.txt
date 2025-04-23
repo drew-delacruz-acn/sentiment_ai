@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+httpx
+pandas
+polars
+numpy
+yfinance
+pytest
+pytest-asyncio

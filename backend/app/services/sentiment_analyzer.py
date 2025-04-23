@@ -63,6 +63,7 @@ class SentimentAnalyzer:
         self.transcript_loader = transcript_loader
         self.logger = logging.getLogger(__name__)
         self._progress_trackers = {}
+        self._cached_transcripts = {}  # Add cache for transcripts
 
     async def analyze_stock_sentiment(
         self, 
@@ -86,13 +87,16 @@ class SentimentAnalyzer:
             self.logger.info(f"Loading transcripts for {ticker}")
             
             # Load and cache transcript data
-            df = await self.load_transcript_data(ticker)
+            df = await self.load_transcript_data(ticker, from_year)
             if df is None or df.height == 0:
                 return {
                     "status": "error",
                     "message": f"No transcripts found for {ticker}",
                     "data": None
                 }
+            
+            # Cache the loaded transcripts
+            self._cached_transcripts[ticker] = df
             
             self.logger.info(f"Loaded {df.height} transcripts for {ticker}")
             
@@ -138,10 +142,10 @@ class SentimentAnalyzer:
         self._progress_trackers[ticker] = progress  # Store the tracker
         
         try:
-            # Load transcript data
-            df = await self.load_transcript_data(ticker)
-            if df is None or df.height == 0:  # Use height for Polars
-                raise ValueError(f"No transcript data found for ticker {ticker}")
+            # Use cached data instead of making a new API call
+            df = self._cached_transcripts.get(ticker)
+            if df is None:
+                raise ValueError(f"No cached transcript data found for ticker {ticker}")
 
             # Convert to Polars if needed
             if not isinstance(df, pl.DataFrame):
@@ -268,14 +272,21 @@ Summary: [your brief summary]"""}
         if ticker in self._progress_trackers:
             del self._progress_trackers[ticker]
 
-    async def load_transcript_data(self, ticker: str) -> Optional[pl.DataFrame]:
+    async def load_transcript_data(self, ticker: str, from_year: Optional[int] = None) -> Optional[pl.DataFrame]:
         """Load transcript data for a ticker."""
         try:
+            # Check cache first
+            if ticker in self._cached_transcripts:
+                return self._cached_transcripts[ticker]
+
             async with self.transcript_loader as loader:
-                df = await loader.load_transcripts(ticker)
+                df = await loader.load_transcripts(ticker, from_year)
                 if df is None or (isinstance(df, pl.DataFrame) and df.height == 0):
                     self.logger.warning(f"No transcript data found for {ticker}")
                     return None
+                
+                # Cache the results
+                self._cached_transcripts[ticker] = df
                 return df
         except Exception as e:
             self.logger.error(f"Error loading transcript data for {ticker}: {str(e)}")

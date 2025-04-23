@@ -38,8 +38,9 @@ class FMPTranscriptLoader(TranscriptLoader):
             if not self.fmp_service:
                 raise RuntimeError("FMP service not initialized. Use async context manager.")
             
+            # Use provided from_year or default to current year
             current_year = datetime.now().year
-            start_year = from_year or (current_year - 1)
+            start_year = from_year if from_year is not None else current_year
             
             transcripts = await self.fmp_service.get_earnings_call_transcripts(
                 ticker, start_year
@@ -60,15 +61,6 @@ class FMPTranscriptLoader(TranscriptLoader):
             df = df.with_columns(pl.col('date').str.strptime(pl.Datetime))
             return df.sort('date', descending=True)
             
-        except httpx.RequestError as e:
-            logger.error(f"Network error while fetching FMP data for {ticker}: {str(e)}")
-            raise RuntimeError(f"Failed to fetch data for {ticker}") from e
-        except httpx.HTTPStatusError as e:
-            logger.error(f"HTTP error from FMP API for {ticker}: {str(e)}")
-            raise RuntimeError(f"API error for {ticker}") from e
-        except ValueError as e:
-            logger.error(f"Data validation error for {ticker}: {str(e)}")
-            raise
         except Exception as e:
-            logger.error(f"Unexpected error loading FMP transcript data for {ticker}: {str(e)}")
-            raise RuntimeError(f"Failed to process transcripts for {ticker}") from e 
+            logger.error(f"Error loading transcript data for {ticker}: {str(e)}")
+            return pl.DataFrame() 
