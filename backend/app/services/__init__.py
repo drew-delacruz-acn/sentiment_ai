@@ -15,8 +15,13 @@ def init_services(http_client):
     """Initialize services with HTTP client."""
     global _fmp_service, _transcript_loader, _sentiment_analyzer
     
-    _fmp_service = FMPService(http_client=http_client)
+    # Initialize FMP service with API key from environment variables
+    _fmp_service = FMPService()
+    
+    # Initialize transcript loader with HTTP client
     _transcript_loader = FMPTranscriptLoader(http_client)
+    
+    # Initialize sentiment analyzer with transcript loader
     _sentiment_analyzer = SentimentAnalyzer(_transcript_loader)
 
 def get_sentiment_analyzer():

@@ -13,6 +13,7 @@ from app.models import HealthResponse
 from app.services import init_services, get_sentiment_analyzer
 from app.services.prices import PriceService
 from app.core.forecast import PriceForecast
+from app.api import backtest
 
 # Configure logging
 logging.basicConfig(
@@ -32,23 +33,33 @@ global_state = GlobalState()
 async def lifespan(app: FastAPI):
     """Lifecycle manager for async resources."""
     # Initialize shared HTTP client
-    global_state.http_client = httpx.AsyncClient(
+    http_client = httpx.AsyncClient(
         timeout=30.0,  # 30 second timeout
         limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
     )
     logger.info("Starting up async HTTP client")
     
+    # Store in both global state (for backwards compatibility) and app.state
+    global_state.http_client = http_client
+    app.state.http_client = http_client
+    
     # Initialize services with HTTP client
-    init_services(global_state.http_client)
-    global_state.price_service = PriceService(global_state.http_client)
+    init_services(http_client)
+    
+    # Initialize price service with default settings (not http_client)
+    global_state.price_service = PriceService()
     logger.info("Initialized services with HTTP client")
     
     yield  # Server is running and handling requests here
     
     # Cleanup
-    if global_state.http_client:
-        await global_state.http_client.aclose()
+    if http_client:
+        await http_client.aclose()
         logger.info("Closed async HTTP client")
+    
+    # Reset state
+    global_state.http_client = None
+    app.state.http_client = None
 
 app = FastAPI(
     title="Sentiment AI Backtesting API",
@@ -89,7 +100,8 @@ async def root():
         "endpoints": {
             "health": "/health",
             "analyze": "/analyze",
-            "forecast": "/api/forecast/{ticker}"
+            "forecast": "/api/forecast/{ticker}",
+            "backtest": "/api/backtest/{ticker}"
         }
     }
 
@@ -177,6 +189,9 @@ async def forecast_price(
     except Exception as e:
         logger.error(f"Error forecasting {ticker}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Forecast failed: {str(e)}")
+
+# Include routers
+app.include_router(backtest.router, prefix="/api/backtest", tags=["backtest"])
 
 # Error handling
 @app.exception_handler(HTTPException)

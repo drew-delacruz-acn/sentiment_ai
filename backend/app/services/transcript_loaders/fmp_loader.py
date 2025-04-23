@@ -23,7 +23,10 @@ class FMPTranscriptLoader(TranscriptLoader):
             self._http_client = httpx.AsyncClient()
             self._owns_client = True
         if not self.fmp_service:
-            self.fmp_service = FMPService(http_client=self._http_client)
+            # Initialize FMP service with API key from environment variables
+            self.fmp_service = FMPService()
+            # Make sure FMP service has its HTTP client initialized
+            await self.fmp_service.initialize()
         return self
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -31,6 +34,10 @@ class FMPTranscriptLoader(TranscriptLoader):
         if self._owns_client and self._http_client and not self._http_client.is_closed:
             await self._http_client.aclose()
             self._http_client = None
+        
+        # Clean up FMP service if we created it
+        if self.fmp_service:
+            await self.fmp_service.cleanup()
     
     async def load_transcripts(self, ticker: str, from_year: Optional[int] = None) -> pl.DataFrame:
         """Load transcripts for a given ticker."""

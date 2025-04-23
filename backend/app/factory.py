@@ -2,7 +2,7 @@ from typing import Optional
 from httpx import AsyncClient
 from .services.transcript_loaders import FMPTranscriptLoader
 from .services.sentiment_analyzer import SentimentAnalyzer
-from .services.transcript_loader import TranscriptLoader
+from .interfaces.transcript_loader import TranscriptLoader
 
 async def create_sentiment_analyzer(http_client: AsyncClient) -> SentimentAnalyzer:
     """
@@ -15,7 +15,7 @@ async def create_sentiment_analyzer(http_client: AsyncClient) -> SentimentAnalyz
         Configured SentimentAnalyzer instance
     """
     # Create transcript loader
-    transcript_loader = TranscriptLoader(http_client)
+    transcript_loader = FMPTranscriptLoader(http_client)
     
     # Create and return analyzer with dependencies
     return SentimentAnalyzer(transcript_loader=transcript_loader) 
