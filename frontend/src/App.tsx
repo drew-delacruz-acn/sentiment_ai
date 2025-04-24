@@ -4,6 +4,7 @@ import Chart from './components/Chart'
 import Metrics from './components/Metrics'
 import PerformanceSummary from './components/PerformanceSummary'
 import TranscriptTable from './components/TranscriptTable'
+import MarketComparison from './components/MarketComparison'
 import { useAnalysis } from './hooks/useAnalysis'
 import { useForecast } from './hooks/useForecast'
 import { useBacktest } from './hooks/useBacktest'
@@ -287,113 +288,120 @@ function App() {
           />
         )}
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="lg:col-span-1">
+        {/* Price Analysis Chart - Full Width */}
+        {isAnalysisEnabled && (
+          <div className="w-full mb-6">
             <Chart 
               sentimentData={sentimentData} 
               forecastData={forecastData}
               isLoading={isLoading} 
               startYear={startYear}
             />
-            
+          </div>
+        )}
+        
+        {/* Three-column layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Column 1: Equity Curve */}
+          <div className="lg:col-span-1">
             {backtestData && backtestData.data && backtestData.data.equity_curve && (
-              <div className="bg-dark-800 rounded-xl shadow-lg p-6 mt-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold text-white">Equity Curve</h2>
-                  
-                  {/* Add Transcript Toggle Button when transcripts are available */}
-                  {sentimentData?.data?.analysis?.results?.transcript_analyses && 
-                   sentimentData.data.analysis.results.transcript_analyses.length > 0 && (
-                    <div className="lg:hidden">
-                      <button 
-                        onClick={() => document.getElementById('right-transcript-table')?.scrollIntoView({ behavior: 'smooth' })}
-                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white text-sm"
-                      >
-                        View Transcripts
-                      </button>
-                    </div>
-                  )}
+              <div className="bg-dark-800 rounded-xl shadow-lg p-6 h-full flex flex-col">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-lg font-bold text-gray-300 border-b border-gray-700 pb-2 w-full">Equity Curve</h3>
                 </div>
                 
-                <Plot
-                  data={[
-                    {
-                      x: backtestData.data.equity_curve.dates,
-                      y: backtestData.data.equity_curve.values,
-                      type: 'scatter',
-                      mode: 'lines',
-                      name: 'Portfolio Value',
-                      line: { color: 'rgb(16, 185, 129)', width: 3 },
-                      fill: 'tozeroy',
-                      fillcolor: 'rgba(16, 185, 129, 0.1)',
-                    },
-                    // Add market index line if data is available
-                    ...(backtestData.data.market_comparison?.market_index ? [{
-                      x: backtestData.data.market_comparison.market_index.dates,
-                      y: backtestData.data.market_comparison.market_index.values,
-                      type: 'scatter',
-                      mode: 'lines',
-                      name: `${backtestData.data.market_comparison.market_index.name}`,
-                      line: { color: 'rgba(79, 70, 229, 0.8)', width: 2, dash: 'dash' } as PlotlyLineType
-                    }] : [])
-                  ]}
-                  layout={{
-                    autosize: true,
-                    height: 400,
-                    margin: { l: 50, r: 50, b: 50, t: 80 },
-                    xaxis: {
-                      title: 'Date',
-                      gridcolor: '#293548',
-                      linecolor: '#293548',
-                      tickfont: { color: '#cbd5e1' }
-                    },
-                    yaxis: {
-                      title: 'Portfolio Value ($)',
-                      gridcolor: '#293548',
-                      linecolor: '#293548',
-                      tickfont: { color: '#cbd5e1' }
-                    },
-                    legend: {
-                      orientation: 'h',
-                      y: -0.2,
-                      font: { color: '#cbd5e1' }
-                    },
-                    plot_bgcolor: '#1A2235',
-                    paper_bgcolor: '#1A2235',
-                    font: { color: '#cbd5e1' },
-                    hovermode: 'closest'
-                  }}
-                  config={{
-                    displayModeBar: true,
-                    responsive: true,
-                    displaylogo: false
-                  }}
-                  className="w-full"
-                  onInitialized={(figure) => console.log("[DEBUG] Equity curve plot initialized:", figure)}
-                  onError={(err) => console.error("[DEBUG] Equity curve plot error:", err)}
-                />
+                <div className="flex-grow">
+                  <Plot
+                    data={[
+                      {
+                        x: backtestData.data.equity_curve.dates,
+                        y: backtestData.data.equity_curve.values,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: 'Portfolio Value',
+                        line: { color: 'rgb(16, 185, 129)', width: 3 },
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(16, 185, 129, 0.1)',
+                      },
+                      // Add market index line if data is available
+                      ...(backtestData.data.market_comparison?.market_index ? [{
+                        x: backtestData.data.market_comparison.market_index.dates,
+                        y: backtestData.data.market_comparison.market_index.values,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: `${backtestData.data.market_comparison.market_index.name}`,
+                        line: { color: 'rgba(79, 70, 229, 0.8)', width: 2, dash: 'dash' } as PlotlyLineType
+                      }] : [])
+                    ]}
+                    layout={{
+                      autosize: true,
+                      height: 400,
+                      margin: { l: 50, r: 50, b: 50, t: 30 },
+                      xaxis: {
+                        title: 'Date',
+                        gridcolor: '#293548',
+                        linecolor: '#293548',
+                        tickfont: { color: '#cbd5e1' }
+                      },
+                      yaxis: {
+                        title: 'Portfolio Value ($)',
+                        gridcolor: '#293548',
+                        linecolor: '#293548',
+                        tickfont: { color: '#cbd5e1' }
+                      },
+                      legend: {
+                        orientation: 'h',
+                        y: -0.2,
+                        font: { color: '#cbd5e1' }
+                      },
+                      plot_bgcolor: '#1A2235',
+                      paper_bgcolor: '#1A2235',
+                      font: { color: '#cbd5e1' },
+                      hovermode: 'closest'
+                    }}
+                    config={{
+                      displayModeBar: true,
+                      responsive: true,
+                      displaylogo: false
+                    }}
+                    className="w-full"
+                    useResizeHandler={true}
+                    style={{width: "100%", height: "100%"}}
+                    onInitialized={(figure) => console.log("[DEBUG] Equity curve plot initialized:", figure)}
+                    onError={(err) => console.error("[DEBUG] Equity curve plot error:", err)}
+                  />
+                </div>
               </div>
             )}
           </div>
           
+          {/* Column 2: Performance Metrics */}
           <div className="lg:col-span-1">
             <Metrics 
               backtestData={backtestData}
               isLoading={isLoading}
               hideEquityCurve={true}
             />
-            
-            {/* Keep only one TranscriptTable here and make it visible on all screen sizes */}
+          </div>
+          
+          {/* Column 3: Transcript Table */}
+          <div className="lg:col-span-1">
             {sentimentData && sentimentData.data && sentimentData.data.analysis && sentimentData.data.analysis.results && (
-              <div id="right-transcript-table" className="mt-6" style={{ minHeight: '490px' }}>
-                <TranscriptTable 
-                  transcripts={sentimentData.data.analysis.results.transcript_analyses || []} 
-                  startYear={startYear}
-                />
-              </div>
+              <TranscriptTable 
+                transcripts={sentimentData.data.analysis.results.transcript_analyses || []} 
+                startYear={startYear}
+              />
             )}
           </div>
         </div>
+        
+        {/* Market Comparison - Fourth Row */}
+        {isAnalysisEnabled && (
+          <MarketComparison 
+            backtestData={backtestData}
+            isLoading={isLoading}
+          />
+        )}
       </main>
 
       <footer className="bg-gray-800 text-white py-4 mt-12">

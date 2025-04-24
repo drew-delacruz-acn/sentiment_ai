@@ -15,10 +15,9 @@ interface MetricsProps {
   hideEquityCurve?: boolean;
 }
 
-export default function Metrics({ backtestData, isLoading = false, hideEquityCurve = false }: MetricsProps) {
+export default function Metrics({ backtestData, isLoading = false, hideEquityCurve = true }: MetricsProps) {
   const metrics = backtestData?.data?.performance_metrics;
   const equityCurve = backtestData?.data?.equity_curve;
-  const comparison = backtestData?.data?.market_comparison;
   
   // Add debug logging when component receives data
   useEffect(() => {
@@ -26,21 +25,8 @@ export default function Metrics({ backtestData, isLoading = false, hideEquityCur
       console.log('[Metrics] Received backtest data:', backtestData);
       console.log('[Metrics] Equity curve data:', equityCurve);
       console.log('[Metrics] Performance metrics:', metrics);
-      console.log('[Metrics] Market comparison:', comparison);
-      
-      // Validate essential data
-      if (!equityCurve) {
-        console.warn('[Metrics] Missing equity curve data in backtest response');
-      } else {
-        console.log('[Metrics] Equity curve points:', equityCurve.dates.length);
-        console.log('[Metrics] First point:', equityCurve.dates[0], equityCurve.values[0]);
-        console.log('[Metrics] Last point:', 
-          equityCurve.dates[equityCurve.dates.length-1], 
-          equityCurve.values[equityCurve.values.length-1]
-        );
-      }
     }
-  }, [backtestData, equityCurve, metrics, comparison]);
+  }, [backtestData, equityCurve, metrics]);
   
   // Format number as percentage
   const formatPercent = (value: number | undefined | null) => {
@@ -193,12 +179,11 @@ export default function Metrics({ backtestData, isLoading = false, hideEquityCur
   console.log('[Metrics] Rendering with state:', { 
     isLoading, 
     hasData: !!metrics,
-    equityCurvePoints: equityCurve?.dates.length || 0,
-    plotTraces: equityCurveData.length 
+    equityCurvePoints: equityCurve?.dates.length || 0
   });
   
   return (
-    <div className="bg-dark-800 rounded-xl shadow-lg p-6">
+    <div className="bg-dark-800 rounded-xl shadow-lg p-6 h-full flex flex-col">
       {isLoading ? (
         <div className="flex justify-center items-center h-32">
           <p className="text-gray-400">Loading metrics data...</p>
@@ -208,106 +193,41 @@ export default function Metrics({ backtestData, isLoading = false, hideEquityCur
           <p className="text-gray-400">No data available. Please run an analysis first.</p>
         </div>
       ) : (
-        <div className="space-y-6">
-          {/* Main Equity Curve Chart - Only show if hideEquityCurve is false */}
-          {!hideEquityCurve && equityCurveData.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-lg font-bold mb-4 text-gray-300 border-b border-gray-700 pb-2 text-center">Equity Curve</h3>
-              <Plot
-                data={equityCurveData}
-                layout={equityCurveLayout}
-                config={chartConfig}
-                className="w-full"
-                onInitialized={(figure) => console.log('[Metrics] Plot initialized:', figure)}
-                onUpdate={(figure) => console.log('[Metrics] Plot updated:', figure)}
-                onError={(err) => console.error('[Metrics] Plot error:', err)}
-              />
-            </div>
-          )}
-
-          <div>
-            <h3 className="text-lg font-bold mb-4 text-gray-300 border-b border-gray-700 pb-2">Performance Metrics</h3>
-            
-            <div className="overflow-x-auto">
-              <table className="min-w-full table-fixed border-collapse border border-gray-700">
-                <thead>
-                  <tr className="bg-gradient-to-r from-purple-700 to-blue-700 text-white">
-                    <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider border border-gray-700 w-1/4">Metric</th>
-                    <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider border border-gray-700 w-1/4">Value</th>
-                    <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider border border-gray-700 hidden md:table-cell w-2/4">Description</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-dark-700">
-                  <tr>
-                    <td className="py-2 px-4 text-sm font-medium text-gray-300 border border-gray-700">Sharpe Ratio</td>
-                    <td className={`py-2 px-4 text-sm font-bold text-right border border-gray-700 ${getValueColor(metrics.sharpe_ratio)}`}>{formatNumber(metrics.sharpe_ratio)}</td>
-                    <td className="py-2 px-4 text-sm text-gray-400 border border-gray-700 hidden md:table-cell">Return adjusted for risk (higher is better)</td>
-                  </tr>
-                  <tr className="bg-dark-600">
-                    <td className="py-2 px-4 text-sm font-medium text-gray-300 border border-gray-700">Sortino Ratio</td>
-                    <td className={`py-2 px-4 text-sm font-bold text-right border border-gray-700 ${getValueColor(metrics.sortino_ratio)}`}>{formatNumber(metrics.sortino_ratio)}</td>
-                    <td className="py-2 px-4 text-sm text-gray-400 border border-gray-700 hidden md:table-cell">Return adjusted for downside risk</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2 px-4 text-sm font-medium text-gray-300 border border-gray-700">Total Return</td>
-                    <td className={`py-2 px-4 text-sm font-bold text-right border border-gray-700 ${getValueColor(metrics.total_return)}`}>{formatPercent(metrics.total_return)}</td>
-                    <td className="py-2 px-4 text-sm text-gray-400 border border-gray-700 hidden md:table-cell">Overall percentage gain/loss</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2 px-4 text-sm font-medium text-gray-300 border border-gray-700">Max Drawdown</td>
-                    <td className="py-2 px-4 text-sm font-bold text-right border border-gray-700 text-red-500">{formatPercent(metrics.max_drawdown)}</td>
-                    <td className="py-2 px-4 text-sm text-gray-400 border border-gray-700 hidden md:table-cell">Largest percentage drop from peak</td>
-                  </tr>
-                  <tr className="bg-dark-600">
-                    <td className="py-2 px-4 text-sm font-medium text-gray-300 border border-gray-700">Win Rate</td>
-                    <td className={`py-2 px-4 text-sm font-bold text-right border border-gray-700 ${getValueColor(metrics.win_rate)}`}>{formatPercent(metrics.win_rate)}</td>
-                    <td className="py-2 px-4 text-sm text-gray-400 border border-gray-700 hidden md:table-cell">Percentage of profitable trades</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+        <div className="flex flex-col h-full">
+          <h3 className="text-lg font-bold mb-3 text-gray-300 border-b border-gray-700 pb-2">Performance Metrics</h3>
           
-          {/* Market Comparison */}
-          {comparison && (
-            <div>
-              <h3 className="text-lg font-bold mb-4 text-gray-300 border-b border-gray-700 pb-2">Market Comparison</h3>
-              <div className="overflow-x-auto">
-                <table className="min-w-full table-fixed border-collapse border border-gray-700">
-                  <thead>
-                    <tr className="bg-gradient-to-r from-red-600 to-orange-500 text-white">
-                      <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider border border-gray-700 w-1/2">Metric</th>
-                      <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider border border-gray-700 w-1/2">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-dark-700">
-                    <tr>
-                      <td className="py-2 px-4 text-sm font-medium text-gray-300 border border-gray-700">Strategy Return</td>
-                      <td className={`py-2 px-4 text-sm font-extrabold text-right border border-gray-700 ${getValueColor(comparison.strategy_return)}`}>{formatPercent(comparison.strategy_return)}</td>
-                    </tr>
-                    
-                    {/* Add Market Index Return if available */}
-                    {comparison.market_index && (
-                      <tr className="bg-dark-600">
-                        <td className="py-2 px-4 text-sm font-medium text-gray-300 border border-gray-700">{comparison.market_index.name} Return</td>
-                        <td className={`py-2 px-4 text-sm font-extrabold text-right border border-gray-700 ${getValueColor(comparison.market_index.return)}`}>{formatPercent(comparison.market_index.return)}</td>
-                      </tr>
-                    )}
-                    
-                    <tr className={comparison.market_index ? '' : 'bg-dark-600'}>
-                      <td className="py-2 px-4 text-sm font-medium text-gray-300 border border-gray-700">Market Return</td>
-                      <td className={`py-2 px-4 text-sm font-extrabold text-right border border-gray-700 ${getValueColor(comparison.market_return)}`}>{formatPercent(comparison.market_return)}</td>
-                    </tr>
-                    
-                    <tr className={comparison.market_index ? 'bg-dark-600' : ''}>
-                      <td className="py-2 px-4 text-sm font-medium text-gray-300 border border-gray-700">Outperformance</td>
-                      <td className={`py-2 px-4 text-sm font-extrabold text-right border border-gray-700 ${getValueColor(comparison.outperformance)}`}>{formatPercent(comparison.outperformance)}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+          <div className="flex-grow">
+            <table className="w-full h-full table-fixed border-collapse">
+              <thead>
+                <tr>
+                  <th className="bg-gradient-to-r from-purple-700 to-violet-600 text-white text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider">METRIC</th>
+                  <th className="bg-gradient-to-r from-violet-600 to-blue-700 text-white text-right px-6 py-4 text-xs font-semibold uppercase tracking-wider">VALUE</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-700">
+                <tr style={{ height: '20%' }}>
+                  <td className="px-6 py-4 bg-dark-700 text-center text-sm font-medium text-gray-300">Sharpe Ratio</td>
+                  <td className={`px-6 py-4 bg-dark-700 text-right text-sm font-bold ${getValueColor(metrics.sharpe_ratio)}`}>{formatNumber(metrics.sharpe_ratio)}</td>
+                </tr>
+                <tr style={{ height: '20%' }}>
+                  <td className="px-6 py-4 bg-dark-600 text-center text-sm font-medium text-gray-300">Sortino Ratio</td>
+                  <td className={`px-6 py-4 bg-dark-600 text-right text-sm font-bold ${getValueColor(metrics.sortino_ratio)}`}>{formatNumber(metrics.sortino_ratio)}</td>
+                </tr>
+                <tr style={{ height: '20%' }}>
+                  <td className="px-6 py-4 bg-dark-700 text-center text-sm font-medium text-gray-300">Total Return</td>
+                  <td className={`px-6 py-4 bg-dark-700 text-right text-sm font-bold ${getValueColor(metrics.total_return)}`}>{formatPercent(metrics.total_return)}</td>
+                </tr>
+                <tr style={{ height: '20%' }}>
+                  <td className="px-6 py-4 bg-dark-600 text-center text-sm font-medium text-gray-300">Max Drawdown</td>
+                  <td className="px-6 py-4 bg-dark-600 text-right text-sm font-bold text-red-500">{formatPercent(metrics.max_drawdown)}</td>
+                </tr>
+                <tr style={{ height: '20%' }}>
+                  <td className="px-6 py-4 bg-dark-700 text-center text-sm font-medium text-gray-300">Win Rate</td>
+                  <td className={`px-6 py-4 bg-dark-700 text-right text-sm font-bold ${getValueColor(metrics.win_rate)}`}>{formatPercent(metrics.win_rate)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

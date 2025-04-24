@@ -257,8 +257,8 @@ export default function Chart({ sentimentData, forecastData, isLoading = false, 
       ? `Price History and Forecast: ${forecastData.metadata.ticker}`
       : 'Price History and Forecast',
     autosize: true,
-    height: 500,
-    margin: { l: 50, r: 50, b: 50, t: 80 },
+    height: 480,
+    margin: { l: 50, r: 50, b: 80, t: 80 },
     xaxis: {
       title: 'Date',
       rangeslider: { visible: false },
@@ -275,7 +275,7 @@ export default function Chart({ sentimentData, forecastData, isLoading = false, 
     },
     legend: {
       orientation: 'h',
-      y: -0.2,
+      y: -0.15,
       font: { color: '#cbd5e1' }
     },
     hovermode: 'closest',
@@ -296,7 +296,7 @@ export default function Chart({ sentimentData, forecastData, isLoading = false, 
   };
 
   return (
-    <div ref={chartRef} className="bg-dark-800 rounded-xl shadow-lg p-6 mb-6">
+    <div ref={chartRef} className="bg-dark-800 rounded-xl shadow-lg p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-white">Price Analysis and Forecast</h2>
         {plotData.length > 0 && (
@@ -310,21 +310,22 @@ export default function Chart({ sentimentData, forecastData, isLoading = false, 
       </div>
       
       {isLoading ? (
-        <div className="flex justify-center items-center h-64">
+        <div className="flex justify-center items-center h-80">
           <p className="text-gray-400">Loading chart data...</p>
         </div>
       ) : plotData.length === 0 ? (
-        <div className="flex justify-center items-center h-64">
+        <div className="flex justify-center items-center h-80">
           <p className="text-gray-400">No data available. Please run an analysis first.</p>
         </div>
       ) : (
-        <div className="flex justify-center">
+        <div className="flex justify-center w-full">
           <Plot 
             data={plotData} 
-            layout={{...layout, autosize: true}}
+            layout={layout}
             config={config}
             className="w-full"
-            style={{margin: '0 auto'}}
+            useResizeHandler={true}
+            style={{width: "100%", height: "100%"}}
           />
         </div>
       )}

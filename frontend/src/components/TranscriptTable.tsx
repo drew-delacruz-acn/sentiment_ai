@@ -102,64 +102,60 @@ export default function TranscriptTable({ transcripts, startYear }: TranscriptTa
     setModalOpen(false);
   };
 
-  const truncateText = (text: string, maxLength = 100) => {
+  const truncateText = (text: string, maxLength = 80) => {
     if (!text) return '';
     return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
   };
 
   if (!filteredTranscripts || filteredTranscripts.length === 0) {
     return (
-      <div className="bg-dark-800 rounded-xl shadow-lg p-4 sm:p-6">
-        <h2 className="text-xl font-semibold text-white mb-4">Earnings Call Transcripts</h2>
+      <div className="flex flex-col h-full bg-dark-800 rounded-xl shadow-lg p-6">
+        <h3 className="text-lg font-bold mb-3 text-gray-300 border-b border-gray-700 pb-2">Earnings Call Transcripts</h3>
         <p className="text-gray-400">No transcript data available for the selected date range</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-dark-800 rounded-xl shadow-lg p-4 sm:p-6 flex flex-col h-full">
-      <div className="flex justify-center items-center mb-4">
-        <h2 className="text-xl font-semibold text-white">Earnings Call Transcripts</h2>
-      </div>
+    <div className="flex flex-col h-full bg-dark-800 rounded-xl shadow-lg p-6">
+      <h3 className="text-lg font-bold mb-3 text-gray-300 border-b border-gray-700 pb-2">Earnings Call Transcripts</h3>
       
-      {/* Improved scrolling container */}
-      <div className="overflow-hidden flex-grow h-full relative" style={{ minHeight: '360px' }}>
-        <div className="absolute inset-0 overflow-y-auto overflow-x-hidden">
-          <table className="min-w-full bg-dark-900 rounded-lg border border-gray-800">
-            <thead className="bg-gray-800 sticky top-0 z-10">
-              <tr>
-                <th className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-gray-300">Date</th>
-                <th className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-gray-300">Sentiment</th>
-                <th className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-gray-300">Transcript</th>
+      {/* Scrollable container with fixed height */}
+      <div className="overflow-y-auto h-[400px] pr-1">
+        <table className="min-w-full bg-dark-900 rounded-lg border border-gray-800">
+          <thead className="bg-gray-800 sticky top-0 z-10">
+            <tr>
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-300 w-1/4">Date</th>
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-300 w-1/4">Sentiment</th>
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-300 w-2/4">Transcript</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-700">
+            {filteredTranscripts.map((transcript, index) => (
+              <tr 
+                key={index} 
+                className="hover:bg-dark-700 cursor-pointer transition-colors"
+                onClick={() => openTranscriptModal(transcript)}
+              >
+                <td className="px-3 py-2 text-xs text-gray-300 whitespace-nowrap">
+                  {new Date(transcript.date).toLocaleDateString()}
+                </td>
+                <td className="px-3 py-2 text-xs">
+                  <span className={`inline-block px-2 py-1 rounded-full text-xs ${
+                    transcript.sentiment === 'optimistic' ? 'bg-green-900 text-green-200' :
+                    transcript.sentiment === 'negative' ? 'bg-red-900 text-red-200' :
+                    'bg-gray-700 text-gray-200'
+                  }`}>
+                    {transcript.sentiment.charAt(0).toUpperCase() + transcript.sentiment.slice(1)}
+                  </span>
+                </td>
+                <td className="px-3 py-2 text-xs text-gray-300">
+                  {truncateText(transcript.summary)}
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-700">
-              {filteredTranscripts.map((transcript, index) => (
-                <tr 
-                  key={index} 
-                  className="hover:bg-dark-700 cursor-pointer transition-colors"
-                  onClick={() => openTranscriptModal(transcript)}
-                >
-                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-300 whitespace-nowrap">
-                    {new Date(transcript.date).toLocaleDateString()}
-                  </td>
-                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
-                    <span className={`inline-block px-2 py-1 rounded-full text-xs ${
-                      transcript.sentiment === 'optimistic' ? 'bg-green-900 text-green-200' :
-                      transcript.sentiment === 'negative' ? 'bg-red-900 text-red-200' :
-                      'bg-gray-700 text-gray-200'
-                    }`}>
-                      {transcript.sentiment.charAt(0).toUpperCase() + transcript.sentiment.slice(1)}
-                    </span>
-                  </td>
-                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-300">
-                    {truncateText(transcript.summary)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       <TranscriptModal 
