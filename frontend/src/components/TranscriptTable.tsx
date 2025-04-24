@@ -118,12 +118,8 @@ export default function TranscriptTable({ transcripts, startYear }: TranscriptTa
 
   return (
     <div className="bg-dark-800 rounded-xl shadow-lg p-4 sm:p-6 flex flex-col h-full">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-center items-center mb-4">
         <h2 className="text-xl font-semibold text-white">Earnings Call Transcripts</h2>
-        <span className="text-gray-400 text-sm bg-dark-700 px-2 py-1 rounded">
-          {filteredTranscripts.length} transcripts found{filteredTranscripts.length !== transcripts.length ? 
-            ` (filtered from ${transcripts.length})` : ''}
-        </span>
       </div>
       
       {/* Improved scrolling container */}

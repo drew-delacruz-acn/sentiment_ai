@@ -212,7 +212,7 @@ export default function Metrics({ backtestData, isLoading = false, hideEquityCur
           {/* Main Equity Curve Chart - Only show if hideEquityCurve is false */}
           {!hideEquityCurve && equityCurveData.length > 0 && (
             <div className="mb-8">
-              <h3 className="text-lg font-medium mb-4 text-gray-300 border-b border-gray-700 pb-2">Equity Curve</h3>
+              <h3 className="text-lg font-bold mb-4 text-gray-300 border-b border-gray-700 pb-2 text-center">Equity Curve</h3>
               <Plot
                 data={equityCurveData}
                 layout={equityCurveLayout}
@@ -226,7 +226,7 @@ export default function Metrics({ backtestData, isLoading = false, hideEquityCur
           )}
 
           <div>
-            <h3 className="text-lg font-medium mb-4 text-gray-300 border-b border-gray-700 pb-2">Performance Metrics</h3>
+            <h3 className="text-lg font-bold mb-4 text-gray-300 border-b border-gray-700 pb-2">Performance Metrics</h3>
             
             <div className="overflow-x-auto">
               <table className="min-w-full table-fixed border-collapse border border-gray-700">
@@ -271,7 +271,7 @@ export default function Metrics({ backtestData, isLoading = false, hideEquityCur
           {/* Market Comparison */}
           {comparison && (
             <div>
-              <h3 className="text-lg font-medium mb-4 text-gray-300 border-b border-gray-700 pb-2">Market Comparison</h3>
+              <h3 className="text-lg font-bold mb-4 text-gray-300 border-b border-gray-700 pb-2">Market Comparison</h3>
               <div className="overflow-x-auto">
                 <table className="min-w-full table-fixed border-collapse border border-gray-700">
                   <thead>

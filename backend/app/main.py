@@ -9,6 +9,23 @@ import httpx
 from typing import Optional
 import asyncio
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+# First try the backend-specific .env file
+backend_env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
+if os.path.exists(backend_env_path):
+    load_dotenv(backend_env_path)
+else:
+    # Fallback to the project root .env file
+    project_root_env = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), ".env")
+    if os.path.exists(project_root_env):
+        load_dotenv(project_root_env)
+    else:
+        # If no specific .env file is found, try default behavior (current directory)
+        load_dotenv()
+
 from app.models import HealthResponse
 from app.services import init_services, get_sentiment_analyzer
 from app.services.prices import PriceService
