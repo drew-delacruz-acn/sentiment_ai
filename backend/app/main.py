@@ -106,13 +106,13 @@ async def root():
     }
 
 @app.get("/analyze/{ticker}")
-async def analyze_ticker(ticker: str, year: Optional[int] = None):
+async def analyze_ticker(ticker: str, from_year: Optional[int] = None):
     """
     Analyze sentiment for a given ticker's earnings call transcripts.
     
     Args:
         ticker: Stock ticker symbol
-        year: Optional year to filter transcripts (defaults to current year)
+        from_year: Optional start year to filter transcripts (defaults to all years)
     """
     try:
         if global_state.http_client is None:
@@ -120,7 +120,7 @@ async def analyze_ticker(ticker: str, year: Optional[int] = None):
             
         # Get the initialized sentiment analyzer
         analyzer = get_sentiment_analyzer()
-        results = await analyzer.analyze_stock_sentiment(ticker, year)
+        results = await analyzer.analyze_stock_sentiment(ticker, from_year)
         
         if results["status"] == "error":
             raise HTTPException(status_code=500, detail=results["message"])
@@ -169,10 +169,21 @@ async def forecast_price(
         forecaster = PriceForecast()
         forecast_result = forecaster.create_forecast(historical_data, forecast_days)
         
+        # Prepare OHLC data for candlestick chart
+        ohlc_data = None
+        if 'Open' in historical_data.columns and 'High' in historical_data.columns and 'Low' in historical_data.columns:
+            ohlc_data = {
+                'open': historical_data['Open'].tolist(),
+                'high': historical_data['High'].tolist(),
+                'low': historical_data['Low'].tolist(),
+                'close': historical_data['Close'].tolist(),
+            }
+        
         return {
             "historical": {
                 "dates": historical_data.index.strftime("%Y-%m-%d").tolist(),
-                "prices": historical_data["Close"].tolist()
+                "prices": historical_data["Close"].tolist(),
+                "ohlc": ohlc_data  # Add OHLC data for candlestick chart
             },
             "forecast": {
                 "dates": forecast_result["dates"],

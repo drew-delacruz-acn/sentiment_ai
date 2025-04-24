@@ -9,6 +9,7 @@ from .async_llm_client import async_llm_batch, DEFAULT_LLM_API
 from ..utils.logging import setup_logger
 from ..interfaces.transcript_loader import TranscriptLoader
 import logging
+import pandas as pd
 
 logger = setup_logger(__name__)
 
@@ -81,7 +82,7 @@ class SentimentAnalyzer:
             Dict containing sentiment analysis results
         """
         try:
-            self.logger.info(f"Starting sentiment analysis for {ticker}")
+            self.logger.info(f"Starting sentiment analysis for {ticker}, from_year={from_year}")
             
             # Load transcript data using the provided loader within context
             self.logger.info(f"Loading transcripts for {ticker}")
@@ -89,16 +90,28 @@ class SentimentAnalyzer:
             # Load and cache transcript data
             df = await self.load_transcript_data(ticker, from_year)
             if df is None or df.height == 0:
+                self.logger.error(f"No transcripts found for {ticker}")
                 return {
                     "status": "error",
                     "message": f"No transcripts found for {ticker}",
                     "data": None
                 }
             
+            # Log detailed information about loaded transcripts
+            self.logger.info(f"Loaded {df.height} transcripts for {ticker}")
+            
+            if isinstance(df, pl.DataFrame):
+                # Log the date range of the transcripts
+                min_date = df.select(pl.col("date").min()).item()
+                max_date = df.select(pl.col("date").max()).item()
+                self.logger.info(f"Transcript date range: {min_date} to {max_date}")
+                
+                # Log all dates for debugging
+                dates_list = df.select("date").to_series().to_list()
+                self.logger.info(f"All transcript dates: {sorted(dates_list)}")
+            
             # Cache the loaded transcripts
             self._cached_transcripts[ticker] = df
-            
-            self.logger.info(f"Loaded {df.height} transcripts for {ticker}")
             
             # Initialize progress tracking
             progress = AnalysisProgress(df.height)
@@ -108,6 +121,15 @@ class SentimentAnalyzer:
             self.logger.info(f"Starting batch analysis for {ticker}")
             analysis_results = await self.analyze_transcript(ticker)
             self.logger.info(f"Completed batch analysis for {ticker}")
+            
+            # Log the results
+            num_analyses = len(analysis_results.get('results', {}).get('transcript_analyses', []))
+            self.logger.info(f"Generated {num_analyses} transcript analysis results")
+            
+            if 'results' in analysis_results and 'transcript_analyses' in analysis_results['results']:
+                # Log all sentiment result dates
+                result_dates = [item['date'] for item in analysis_results['results']['transcript_analyses']]
+                self.logger.info(f"Analysis result dates: {sorted(result_dates)}")
             
             # Prepare response
             response = {
@@ -124,7 +146,7 @@ class SentimentAnalyzer:
                 }
             }
             
-            self.logger.info(f"Analysis complete for {ticker}")
+            self.logger.info(f"Analysis complete for {ticker} with {num_analyses} results")
             return response
             
         except Exception as e:
@@ -152,15 +174,39 @@ class SentimentAnalyzer:
                 df = pl.from_pandas(df)
             
             total_transcripts = df.height
+            self.logger.info(f"DEBUG: Processing {total_transcripts} transcripts for sentiment analysis")
+            
             progress = AnalysisProgress(total_transcripts)  # Re-initialize with actual total
             self._progress_trackers[ticker] = progress  # Update the tracker with actual total
             
             results = []
             
+            # Log the data structure before processing
+            self.logger.info(f"DEBUG: DataFrame schema: {df.schema}")
+            if 'date' in df.columns:
+                self.logger.info(f"DEBUG: Date column type: {df.schema['date']}")
+                
+                # Log all dates in the DataFrame
+                dates = sorted([d.strftime("%Y-%m-%d") if hasattr(d, "strftime") else str(d) 
+                           for d in df.select("date").to_series().to_list()])
+                self.logger.info(f"DEBUG: All dates in DataFrame: {dates}")
+            
+            # *** IMPORTANT FIX: No LIMIT on batch processing ***
+            # IMPORTANT: Process ALL transcripts, not just the first few batches
+            batch_count = (total_transcripts + batch_size - 1) // batch_size
+            self.logger.info(f"DEBUG: Will process {batch_count} batches with batch_size={batch_size}")
+            
             # Process in batches
             for i in range(0, total_transcripts, batch_size):
                 # Get batch using Polars slice
-                batch = df.slice(i, batch_size)
+                batch = df.slice(i, min(batch_size, total_transcripts - i))
+                self.logger.info(f"DEBUG: Processing batch {i//batch_size + 1}/{batch_count} with {batch.height} transcripts")
+                
+                # Print the dates in this batch for debugging
+                if 'date' in df.columns:
+                    batch_dates = [d.strftime("%Y-%m-%d") if hasattr(d, "strftime") else str(d) 
+                                   for d in batch.select("date").to_series().to_list()]
+                    self.logger.info(f"DEBUG: Batch {i//batch_size + 1} dates: {batch_dates}")
                 
                 # Prepare prompts for the batch
                 prompts = []
@@ -216,15 +262,29 @@ Summary: [your brief summary]"""}
                         
                         if sentiment and summary:
                             row_data = batch.row(idx, named=True)
+                            
+                            # Log the row data being processed
+                            date_str = row_data['date'].strftime('%Y-%m-%d') if 'date' in row_data and hasattr(row_data['date'], 'strftime') else str(row_data.get('date', 'unknown'))
+                            self.logger.info(f"Processing transcript from {date_str} with sentiment: {sentiment}")
+                            
                             results.append({
                                 'sentiment': sentiment,
                                 'summary': summary,
-                                'date': row_data['date'].strftime('%Y-%m-%d') if 'date' in row_data else None
+                                'date': date_str,
+                                'fullText': row_data['content'] if 'content' in row_data else None  # Add full transcript text
                             })
                     except Exception as e:
                         logger.error(f"Error parsing result: {str(e)}")
                         continue
 
+            # IMPORTANT: Make sure we have results from all batches
+            self.logger.info(f"DEBUG: Completed processing all {batch_count} batches")
+            self.logger.info(f"DEBUG: Total results collected: {len(results)}")
+            self.logger.info(f"DEBUG: Expected results: {total_transcripts}")
+            
+            if len(results) < total_transcripts:
+                self.logger.error(f"DEBUG: Missing results! Collected {len(results)} out of {total_transcripts}")
+            
             # Calculate aggregate statistics
             if results:
                 # Convert sentiment to numeric for stats
@@ -232,22 +292,45 @@ Summary: [your brief summary]"""}
                 sentiment_scores = [sentiment_map[r['sentiment']] for r in results if r['sentiment'] in sentiment_map]
                 
                 if sentiment_scores:
+                    # Create distribution count of sentiments
+                    sentiment_counts = {
+                        'optimistic': sum(1 for r in results if r['sentiment'] == 'optimistic'),
+                        'neutral': sum(1 for r in results if r['sentiment'] == 'neutral'),
+                        'pessimistic': sum(1 for r in results if r['sentiment'] == 'pessimistic')
+                    }
+                    self.logger.info(f"Sentiment distribution: {sentiment_counts}")
+                    
+                    # Sort results by date in descending order before returning
+                    results.sort(key=lambda x: x['date'], reverse=True)
+                    
+                    # Log the final sorted list of dates
+                    final_result_dates = [r['date'] for r in results]
+                    self.logger.info(f"Final sorted result dates: {final_result_dates}")
+                    
+                    # IMPORTANT: Make sure we're returning ALL transcripts
+                    self.logger.info(f"DEBUG: Returning exactly {len(results)} out of {total_transcripts} transcript analyses")
+                    
                     stats = {
                         'mean_sentiment': float(sum(sentiment_scores) / len(sentiment_scores)),
-                        'sentiment_counts': {
-                            'optimistic': sum(1 for r in results if r['sentiment'] == 'optimistic'),
-                            'neutral': sum(1 for r in results if r['sentiment'] == 'neutral'),
-                            'pessimistic': sum(1 for r in results if r['sentiment'] == 'pessimistic')
-                        },
+                        'sentiment_counts': sentiment_counts,
                         'total_analyzed': len(results),
                         'transcript_analyses': [
                             {
                                 'date': r['date'],
                                 'sentiment': r['sentiment'],
-                                'summary': r['summary']
+                                'summary': r['summary'],
+                                'fullText': r['fullText']
                             } for r in results
                         ]
                     }
+                    
+                    # Log the number of results being returned
+                    self.logger.info(f"Returning {len(stats['transcript_analyses'])} transcript analyses")
+                    
+                    # Verify one more time that all transcripts have been analyzed and included
+                    if len(stats['transcript_analyses']) != total_transcripts:
+                        self.logger.error(f"DEBUG: CRITICAL - Missing transcripts in final response! Returning {len(stats['transcript_analyses'])} out of {total_transcripts}")
+                        
                     progress.complete(stats)
                 else:
                     progress.fail("No valid sentiment scores found in results")

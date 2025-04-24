@@ -1,0 +1,208 @@
+2025-04-23 18:45:06,502 - __main__ - INFO - Starting sentiment analysis for ACN 2021 transcripts
+2025-04-23 18:45:32,093 - __main__ - INFO - Starting sentiment analysis for ACN 2021 transcripts
+2025-04-23 18:45:32,099 - app.services.transcript_loaders.loader_factory - INFO - [FACTORY] TranscriptLoaderFactory initialized
+2025-04-23 18:45:32,099 - app.services.transcript_loaders.loader_factory - INFO - [FACTORY] Default ACN parquet path: /Users/andrewdelacruz/sentiment_ai/backend/app/data/trx_raw_ACN.parquet (exists: True)
+2025-04-23 18:45:32,099 - app.services.transcript_loaders.loader_factory - INFO - [FACTORY] Parquet file size: 843.79 KB
+2025-04-23 18:45:32,099 - app.services.sentiment_analyzer - INFO - [ANALYZER] SentimentAnalyzer initialized with transcript_loader_factory
+2025-04-23 18:45:32,099 - __main__ - INFO - Analyzing sentiment for ACN transcripts from 2021
+2025-04-23 18:45:32,099 - app.services.transcript_loaders.loader_factory - INFO - [FACTORY] Getting transcript loader for ticker: ACN
+2025-04-23 18:45:32,099 - app.services.transcript_loaders.loader_factory - INFO - [FACTORY] Creating new ParquetTranscriptLoader for ACN
+2025-04-23 18:45:32,099 - app.services.transcript_loaders.parquet_loader - INFO - ParquetTranscriptLoader initialized with file path: /Users/andrewdelacruz/sentiment_ai/backend/app/data/trx_raw_ACN.parquet
+2025-04-23 18:45:32,100 - app.services.transcript_loaders.parquet_loader - INFO - Parquet file confirmed: /Users/andrewdelacruz/sentiment_ai/backend/app/data/trx_raw_ACN.parquet (843.79 KB)
+2025-04-23 18:45:32,186 - app.services.transcript_loaders.parquet_loader - INFO - Parquet file validated with 70 rows, columns: ['symbol', 'quarter', 'year', 'date', 'content']
+2025-04-23 18:45:32,188 - app.services.transcript_loaders.parquet_loader - INFO - Years in parquet file: [2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025]
+2025-04-23 18:45:32,188 - app.services.transcript_loaders.loader_factory - INFO - [FACTORY] ACN parquet file path: /Users/andrewdelacruz/sentiment_ai/backend/app/data/trx_raw_ACN.parquet (exists: True)
+2025-04-23 18:45:32,188 - app.services.transcript_loaders.parquet_loader - INFO - [PARQUET] Loading transcripts for ACN, from_year=2021
+2025-04-23 18:45:32,188 - app.services.transcript_loaders.parquet_loader - INFO - [PARQUET] Loading file from /Users/andrewdelacruz/sentiment_ai/backend/app/data/trx_raw_ACN.parquet
+2025-04-23 18:45:32,195 - app.services.transcript_loaders.parquet_loader - INFO - [PARQUET] Raw file loaded in 0.01s, shape: (70, 5)
+2025-04-23 18:45:32,199 - app.services.transcript_loaders.parquet_loader - INFO - [PARQUET] DataFrame inspection: {'shape': (70, 5), 'columns': ['symbol', 'quarter', 'year', 'date', 'content'], 'dtypes': {'symbol': 'object', 'quarter': 'int64', 'year': 'int64', 'date': 'object', 'content': 'object'}, 'null_counts': {'symbol': np.int64(0), 'quarter': np.int64(0), 'year': np.int64(0), 'date': np.int64(0), 'content': np.int64(0)}, 'years': [2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], 'year_counts': {2007: 4, 2017: 4, 2024: 4, 2023: 4, 2022: 4, 2021: 4, 2020: 4, 2019: 4, 2018: 4, 2016: 4, 2008: 4, 2015: 4, 2014: 4, 2013: 4, 2012: 4, 2011: 3, 2010: 3, 2009: 3, 2025: 1}, 'min_date': '2006-12-20 16:30:00', 'max_date': '2024-12-19 08:00:00', 'empty_content_count': 0}
+2025-04-23 18:45:32,200 - app.services.transcript_loaders.parquet_loader - INFO - [PARQUET] Found symbol column, filtering for ACN
+2025-04-23 18:45:32,200 - app.services.transcript_loaders.parquet_loader - INFO - [PARQUET] Symbol filtering: 70 → 70 rows
+2025-04-23 18:45:32,200 - app.services.transcript_loaders.parquet_loader - INFO - [PARQUET] Available years: [2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025]
+2025-04-23 18:45:32,200 - app.services.transcript_loaders.parquet_loader - INFO - [PARQUET] Filtering transcripts by year >= 2021
+2025-04-23 18:45:32,201 - app.services.transcript_loaders.parquet_loader - INFO - [PARQUET] Year filtering: 70 → 17 rows
+2025-04-23 18:45:32,230 - app.services.transcript_loaders.parquet_loader - ERROR - [PARQUET] Error converting date column: conversion from `str` to `datetime[μs]` failed in column 'date' for 17 out of 17 values: ["2020-12-17 08:00:00", "2021-03-18 08:00:00", … "2024-12-19 08:00:00"]
+
+You might want to try:
+- setting `strict=False` to set values that cannot be converted to `null`
+- using `str.strptime`, `str.to_date`, or `str.to_datetime` and providing a format string
+2025-04-23 18:45:32,237 - app.services.transcript_loaders.parquet_loader - INFO - [PARQUET] Successfully converted date using pandas
+2025-04-23 18:45:32,241 - app.services.transcript_loaders.parquet_loader - INFO - [PARQUET] Completed loading 17 transcripts for ACN in 0.05s
+2025-04-23 18:45:32,244 - __main__ - INFO - Loaded 17 transcripts for ACN from 2021
+2025-04-23 18:45:32,247 - __main__ - INFO - Transcript dates: ['2024-12-19', '2024-09-26', '2024-06-20', '2024-03-21', '2023-12-19', '2023-09-28', '2023-06-22', '2023-03-23', '2022-12-16', '2022-09-22', '2022-06-23', '2022-03-17', '2021-12-16', '2021-09-23', '2021-06-24', '2021-03-18', '2020-12-17']
+2025-04-23 18:45:32,248 - app.services.sentiment_analyzer - INFO - [ANALYZER] Analyzing 17 transcripts in batches of 5
+2025-04-23 18:45:32,248 - app.services.sentiment_analyzer - INFO - [ANALYZER] Processing batch 1/4 with 5 transcripts
+2025-04-23 18:45:32,248 - app.services.sentiment_analyzer - INFO - [ANALYZER] Sending batch to LLM API for analysis
+2025-04-23 18:45:32,249 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:32,249 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:32,249 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:32,255 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:32,255 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:32,256 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:32,256 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:32,256 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:32,256 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:32,256 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:32,256 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:32,256 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:32,257 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:32,257 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:32,257 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:33,833 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:33,834 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:34,259 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:34,259 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:34,651 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:34,652 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:34,844 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:34,844 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:34,934 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:34,935 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:34,935 - app.services.sentiment_analyzer - INFO - [ANALYZER] LLM analysis completed in 2.69s
+2025-04-23 18:45:34,935 - app.services.sentiment_analyzer - INFO - [ANALYZER] Batch processed in 2.69s, parsed 5/5 responses
+2025-04-23 18:45:34,935 - app.services.sentiment_analyzer - INFO - [ANALYZER] Processing batch 2/4 with 5 transcripts
+2025-04-23 18:45:34,935 - app.services.sentiment_analyzer - INFO - [ANALYZER] Sending batch to LLM API for analysis
+2025-04-23 18:45:34,935 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:34,935 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:34,935 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:34,936 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:34,936 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:34,936 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:34,936 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:34,936 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:34,936 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:34,936 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:34,936 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:34,936 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:34,937 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:34,937 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:34,937 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:36,187 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:36,188 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:36,324 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:36,324 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:36,436 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:36,436 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:36,712 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:36,713 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:36,838 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:36,838 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:36,838 - app.services.sentiment_analyzer - INFO - [ANALYZER] LLM analysis completed in 1.90s
+2025-04-23 18:45:36,838 - app.services.sentiment_analyzer - INFO - [ANALYZER] Batch processed in 1.90s, parsed 5/5 responses
+2025-04-23 18:45:36,838 - app.services.sentiment_analyzer - INFO - [ANALYZER] Processing batch 3/4 with 5 transcripts
+2025-04-23 18:45:36,838 - app.services.sentiment_analyzer - INFO - [ANALYZER] Sending batch to LLM API for analysis
+2025-04-23 18:45:36,839 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:36,839 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:36,839 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:36,839 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:36,839 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:36,839 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:36,839 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:36,839 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:36,839 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:36,839 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:36,839 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:36,839 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:36,839 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:36,839 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:36,839 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:38,044 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:38,045 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:38,089 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:38,089 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:38,115 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:38,116 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:38,287 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:38,288 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:38,509 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:38,509 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:38,509 - app.services.sentiment_analyzer - INFO - [ANALYZER] LLM analysis completed in 1.67s
+2025-04-23 18:45:38,511 - app.services.sentiment_analyzer - INFO - [ANALYZER] Batch processed in 1.67s, parsed 5/5 responses
+2025-04-23 18:45:38,511 - app.services.sentiment_analyzer - INFO - [ANALYZER] Processing batch 4/4 with 2 transcripts
+2025-04-23 18:45:38,512 - app.services.sentiment_analyzer - INFO - [ANALYZER] Sending batch to LLM API for analysis
+2025-04-23 18:45:38,512 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:38,512 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:38,512 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:38,512 - app.services.async_llm_client - INFO - Starting LLM API call
+2025-04-23 18:45:38,512 - app.services.async_llm_client - INFO - Starting LLM request with retries
+2025-04-23 18:45:38,512 - app.services.async_llm_client - INFO - Making request to https://api.openai.com/v1/chat/completions
+2025-04-23 18:45:39,674 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:39,674 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:39,723 - app.services.async_llm_client - INFO - Successfully received response from LLM API
+2025-04-23 18:45:39,723 - app.services.async_llm_client - INFO - LLM request completed successfully
+2025-04-23 18:45:39,724 - app.services.sentiment_analyzer - INFO - [ANALYZER] LLM analysis completed in 1.21s
+2025-04-23 18:45:39,724 - app.services.sentiment_analyzer - INFO - [ANALYZER] Batch processed in 1.21s, parsed 2/2 responses
+2025-04-23 18:45:39,724 - app.services.sentiment_analyzer - INFO - [ANALYZER] Computing aggregate statistics from 17 analyzed transcripts
+2025-04-23 18:45:39,724 - app.services.sentiment_analyzer - INFO - [ANALYZER] Analysis complete: mean=1.00, counts={'optimistic': 17, 'neutral': 0, 'pessimistic': 0}
+2025-04-23 18:45:39,724 - __main__ - INFO - Overall sentiment stats: {'optimistic': 17, 'neutral': 0, 'pessimistic': 0}
+2025-04-23 18:45:39,724 - __main__ - INFO - Mean sentiment: 1.0
+2025-04-23 18:45:39,724 - __main__ - INFO - 
+--- Individual Transcript Analysis ---
+2025-04-23 18:45:39,724 - __main__ - INFO - Date: 2024-12-19
+2025-04-23 18:45:39,724 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,724 - __main__ - INFO - Summary: The overall sentiment of the call appears to be optimistic based on the structured agenda outlined by the speakers, the focus on financial details and operational metrics, and the mention of providing a business outlook for the second quarter and full fiscal year 2025. Additionally, the reference to non-GAAP financial measures and the acknowledgment of risks and uncertainties suggest a transparent and proactive approach to addressing potential challenges.
+2025-04-23 18:45:39,724 - __main__ - INFO - ---
+2025-04-23 18:45:39,724 - __main__ - INFO - Date: 2024-09-26
+2025-04-23 18:45:39,724 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,724 - __main__ - INFO - Summary: The overall sentiment of the call appears to be optimistic based on the structured agenda outlined by the speakers, the focus on financial details and business outlook for the upcoming fiscal year, and the mention of market positioning updates. The presence of both the current and incoming Chief Financial Officers also indicates a smooth transition and strategic planning for future growth.
+2025-04-23 18:45:39,724 - __main__ - INFO - ---
+2025-04-23 18:45:39,724 - __main__ - INFO - Date: 2024-06-20
+2025-04-23 18:45:39,724 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,724 - __main__ - INFO - Summary: The overall sentiment of the call appears to be optimistic. The Managing Director, Head of Investor Relations, Katie O'Conor, sets a positive tone by outlining the agenda and introducing the Chair and Chief Executive Officer, Julie Sweet, and the Chief Financial Officer, KC McClure. The structured approach to discussing the financial results, operational metrics, market positioning, and business outlook for the fourth quarter and full fiscal year 2024 suggests a confident and positive outlook for Accenture's performance.
+2025-04-23 18:45:39,724 - __main__ - INFO - ---
+2025-04-23 18:45:39,724 - __main__ - INFO - Date: 2024-03-21
+2025-04-23 18:45:39,724 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,725 - __main__ - INFO - Summary: The overall sentiment of the call is optimistic based on the positive tone set by the host, Katie O'Conor, and the agenda outlined for the call, including an overview of strong results, financial details, market positioning update, and a positive business outlook for the third quarter and full fiscal year 2024. The mention of non-GAAP financial measures and the acknowledgment of risks and uncertainties also indicate a transparent approach to discussing the company's performance.
+2025-04-23 18:45:39,725 - __main__ - INFO - ---
+2025-04-23 18:45:39,725 - __main__ - INFO - Date: 2023-12-19
+2025-04-23 18:45:39,725 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,725 - __main__ - INFO - Summary: The overall sentiment of the call is optimistic based on the structured agenda outlined by the speakers, the focus on financial details and market positioning, and the mention of non-GAAP financial measures to provide useful information for investors. The presence of forward-looking statements and the acknowledgment of potential risks and uncertainties do not overshadow the positive tone set by the speakers regarding the company's performance and outlook.
+2025-04-23 18:45:39,725 - __main__ - INFO - ---
+2025-04-23 18:45:39,725 - __main__ - INFO - Date: 2023-09-28
+2025-04-23 18:45:39,725 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,725 - __main__ - INFO - Summary: The overall sentiment of the call is optimistic based on the positive tone set by the speakers and the structured agenda that includes an overview of strong results, financial details, market positioning update, and business outlook for the upcoming fiscal year. The mention of non-GAAP financial measures and potential risks and uncertainties is standard practice but does not overshadow the overall positive outlook presented during the call.
+2025-04-23 18:45:39,725 - __main__ - INFO - ---
+2025-04-23 18:45:39,725 - __main__ - INFO - Date: 2023-06-22
+2025-04-23 18:45:39,725 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,725 - __main__ - INFO - Summary: The overall sentiment of the call appears to be optimistic based on the structure of the call and the agenda outlined by the speakers. The presence of the Chair and Chief Executive Officer, as well as the Chief Financial Officer, suggests a focus on transparency and strategic communication with investors. Additionally, the mention of providing a business outlook for the fourth quarter and full fiscal year 2023 indicates confidence in the company's performance and future prospects.
+2025-04-23 18:45:39,725 - __main__ - INFO - ---
+2025-04-23 18:45:39,725 - __main__ - INFO - Date: 2023-03-23
+2025-04-23 18:45:39,725 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,725 - __main__ - INFO - Summary: The overall sentiment of the earnings call is optimistic based on the structured agenda outlined by the speakers, the mention of reviewing positive results in the news release, and the forward-looking statements regarding market positioning and business outlook for the third quarter and full fiscal year 2023. The emphasis on non-GAAP financial measures and the acknowledgement of risks and uncertainties also indicate a proactive and transparent approach to addressing potential challenges.
+2025-04-23 18:45:39,725 - __main__ - INFO - ---
+2025-04-23 18:45:39,725 - __main__ - INFO - Date: 2022-12-16
+2025-04-23 18:45:39,725 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,725 - __main__ - INFO - Summary: The overall sentiment of the call is optimistic based on the structured agenda outlined by the host, the presence of key executives providing updates on results and outlook, and the mention of non-GAAP financial measures to provide useful information for investors. The tone of the call suggests confidence in the company's performance and future prospects.
+2025-04-23 18:45:39,725 - __main__ - INFO - ---
+2025-04-23 18:45:39,725 - __main__ - INFO - Date: 2022-09-22
+2025-04-23 18:45:39,725 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,725 - __main__ - INFO - Summary: The overall sentiment of the call appears to be optimistic based on the structured agenda outlined by the host, the presence of key executives providing updates on results and outlook, and the mention of forward-looking market positioning and business outlook for the upcoming fiscal year. The tone of the call suggests confidence in the company's performance and future prospects.
+2025-04-23 18:45:39,725 - __main__ - INFO - ---
+2025-04-23 18:45:39,725 - __main__ - INFO - Date: 2022-06-23
+2025-04-23 18:45:39,725 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,725 - __main__ - INFO - Summary: The overall sentiment of the call is optimistic based on the positive tone of the speakers, the structured agenda indicating preparedness, and the mention of reviewing strong results in the news release. Additionally, the forward-looking statements and discussion of non-GAAP financial measures suggest confidence in future performance and transparency in reporting.
+2025-04-23 18:45:39,725 - __main__ - INFO - ---
+2025-04-23 18:45:39,725 - __main__ - INFO - Date: 2022-03-17
+2025-04-23 18:45:39,725 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,725 - __main__ - INFO - Summary: The overall sentiment of the call is optimistic based on the structured agenda outlined by the host, Angie Park, and the mention of reviewing positive results in the news release. Additionally, the presence of forward-looking statements and discussion of non-GAAP financial measures suggest a forward-thinking and proactive approach by Accenture's leadership, indicating confidence in the company's performance and future outlook.
+2025-04-23 18:45:39,725 - __main__ - INFO - ---
+2025-04-23 18:45:39,725 - __main__ - INFO - Date: 2021-12-16
+2025-04-23 18:45:39,725 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,725 - __main__ - INFO - Summary: The overall sentiment of the call is optimistic based on the upbeat tone of the operator and the host, Angie Park, as they introduce the earnings call. The structured agenda outlined by Angie Park, including discussions on financial details, market positioning, and business outlook for the future, suggests a positive outlook for Accenture's performance in the first quarter of fiscal 2022 and beyond.
+2025-04-23 18:45:39,725 - __main__ - INFO - ---
+2025-04-23 18:45:39,725 - __main__ - INFO - Date: 2021-09-23
+2025-04-23 18:45:39,725 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,725 - __main__ - INFO - Summary: The overall sentiment of the call is optimistic based on the positive tone set by the host and the agenda outlined for discussing the company's results, financial details, market positioning, and business outlook. The presence of forward-looking statements and the mention of potential risks and uncertainties do not overshadow the overall optimistic outlook conveyed during the call.
+2025-04-23 18:45:39,725 - __main__ - INFO - ---
+2025-04-23 18:45:39,726 - __main__ - INFO - Date: 2021-06-24
+2025-04-23 18:45:39,726 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,726 - __main__ - INFO - Summary: The overall sentiment of the call is optimistic based on the structured agenda outlined by the Company Representatives, the focus on financial details and operational metrics, and the mention of providing a business outlook for the fourth quarter and full fiscal year 2021. The presence of forward-looking statements and the acknowledgment of potential risks and uncertainties also indicate a proactive and transparent approach, contributing to an optimistic tone.
+2025-04-23 18:45:39,726 - __main__ - INFO - ---
+2025-04-23 18:45:39,726 - __main__ - INFO - Date: 2021-03-18
+2025-04-23 18:45:39,726 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,726 - __main__ - INFO - Summary: The overall sentiment of the call appears to be optimistic. The tone of the speakers, the structured agenda covering financial results and outlook, and the mention of non-GAAP financial metrics for investor information all indicate a positive outlook. The emphasis on market positioning and providing a business outlook for the third quarter and full fiscal year 2021 suggests confidence in the company's performance and future prospects.
+2025-04-23 18:45:39,726 - __main__ - INFO - ---
+2025-04-23 18:45:39,726 - __main__ - INFO - Date: 2020-12-17
+2025-04-23 18:45:39,726 - __main__ - INFO - Sentiment: optimistic
+2025-04-23 18:45:39,726 - __main__ - INFO - Summary: The overall sentiment of the call is optimistic based on the structured agenda outlined by the host, the presence of key executives providing updates on results and outlook, and the mention of forward-looking market positioning and business outlook. The tone of the call suggests confidence in the company's performance and future prospects.
+2025-04-23 18:45:39,726 - __main__ - INFO - ---

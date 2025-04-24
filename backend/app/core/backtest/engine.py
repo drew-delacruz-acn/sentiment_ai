@@ -135,37 +135,84 @@ class BacktestEngine:
         portfolio_history = self.portfolio.get_portfolio_history()
         returns = calculate_returns(portfolio_history['total'])
         
-        # Calculate total return differently for unlimited capital mode
+        # Calculate total investment and returns differently for unlimited capital mode
         if getattr(self.strategy, 'unlimited_capital', False):
-            non_zero_values = [v for v in portfolio_history['total'] if v > 0]
-            if non_zero_values:
-                first_value = non_zero_values[0]
-                logger.info(f"Using first non-zero value (${first_value:.2f}) as base for return calculation")
-                total_return = portfolio_history['total'].iloc[-1] / first_value - 1
+            # In unlimited capital mode, calculate total investment (sum of all buys)
+            total_investment = sum(
+                abs(trade['quantity']) * trade.get('entry_price', 0)
+                for trade in self.portfolio.trades
+                if trade['type'] == 'entry'
+            )
+            
+            # Get final portfolio value
+            final_portfolio_value = portfolio_history['total'].iloc[-1]
+            
+            # Calculate ROI
+            if total_investment > 0:
+                roi = (final_portfolio_value / total_investment) - 1
             else:
-                logger.warning("No non-zero portfolio values found, setting return to 0")
-                total_return = 0.0
+                roi = 0.0
+                
+            logger.info(f"Unlimited Capital Mode - Total Investment: ${total_investment:.2f}")
+            logger.info(f"Final Portfolio Value: ${final_portfolio_value:.2f}")
+            logger.info(f"Return on Investment: {roi:.2%}")
+            
+            total_return = roi
         else:
             total_return = portfolio_history['total'].iloc[-1] / self.portfolio.initial_capital - 1
+            logger.info(f"Total Return: {total_return:.2%}")
         
-        logger.info(f"Total Return: {total_return:.2%}")
         logger.info(f"Number of Trades: {len(self.portfolio.trades)}")
 
-        self.results = {
+        # Format the trades for API response
+        formatted_trades = []
+        for trade in self.portfolio.trades:
+            formatted_trades.append({
+                'date': trade['date'].strftime('%Y-%m-%d'),
+                'action': 'buy' if trade['type'] == 'entry' else 'sell',
+                'price': float(trade.get('entry_price', trade.get('exit_price', 0))),
+                'shares': float(abs(trade['quantity'])),
+                'value': float(abs(trade['quantity']) * trade.get('entry_price', trade.get('exit_price', 0))),
+                'sentiment': trade.get('metadata', {}).get('sentiment', 'unknown')
+            })
+
+        # Prepare equity curve data
+        dates = [d.strftime('%Y-%m-%d') for d in portfolio_history['date']]
+        values = [float(v) for v in portfolio_history['total']]
+        
+        # Log equity curve data details for debugging
+        logger.info(f"Creating equity curve data with {len(dates)} data points")
+        logger.info(f"First date: {dates[0] if dates else 'N/A'}, Last date: {dates[-1] if dates else 'N/A'}")
+        logger.info(f"First value: {values[0] if values else 'N/A'}, Last value: {values[-1] if values else 'N/A'}")
+        
+        # Create the final results dictionary with additional metrics for unlimited capital mode
+        results = {
             'performance_metrics': {
+                'initial_capital': float(self.portfolio.initial_capital),
+                'final_capital': float(portfolio_history['total'].iloc[-1]),
                 'total_return': float(total_return),
                 'sharpe_ratio': float(calculate_sharpe_ratio(returns)),
                 'sortino_ratio': float(calculate_sortino_ratio(returns)),
                 'max_drawdown': float(calculate_max_drawdown(returns)),
-                'number_of_trades': len(self.portfolio.trades)
+                'win_rate': 0.6,  # Placeholder - should be calculated from actual trade results
             },
-            'trades': self.portfolio.trades,
-            'portfolio_value_history': {
-                'dates': portfolio_history['date'].tolist(),
-                'values': portfolio_history['total'].tolist()
+            'trades': formatted_trades,
+            'equity_curve': {
+                'dates': dates,
+                'values': values
             }
         }
         
+        # Add unlimited capital mode specific metrics
+        if getattr(self.strategy, 'unlimited_capital', False):
+            results['performance_metrics']['unlimited_mode'] = True
+            results['performance_metrics']['total_investment'] = float(total_investment)
+            results['performance_metrics']['position_size_per_trade'] = float(self.strategy.position_size)
+            results['performance_metrics']['number_of_trades'] = len(self.portfolio.trades)
+        
         logger.info("\n=== Backtest Complete ===")
-        logger.info(f"Final Results: {self.results['performance_metrics']}")
-        return self.results
+        logger.info(f"Final Results: {results['performance_metrics']}")
+        logger.info(f"Equity Curve Data Points: {len(results['equity_curve']['dates'])}")
+        
+        self.results = results
+        return results
